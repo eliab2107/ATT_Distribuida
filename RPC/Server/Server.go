@@ -6,11 +6,11 @@ import (
 	"net"
 )
 
-func conecta(server net.Conn){
+func conecta(server net.Conn, user string){
+	var res string
 	for {
-		message , _ :=  bufio.NewReader(server).ReadString('\n')
-		res := "funcionando\n"
-		fmt.Println("deu bom ", message)
+		_, _ =  bufio.NewReader(server).ReadString('\n')
+		res = "Confirmação de recebimento de " +  user
 		_, _ = server.Write([]byte(res))
 	}
 	
@@ -22,7 +22,8 @@ func main(){
 	for{
 		conn, _ := server.Accept()
 		defer conn.Close()
-		fmt.Println("conexao aceita")
-		go conecta(conn)
+		user , _ :=  bufio.NewReader(conn).ReadString('\n')
+		fmt.Println("Conexao iniciada com ", user)
+		go conecta(conn, user)
 	}
 }

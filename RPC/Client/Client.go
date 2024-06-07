@@ -12,9 +12,14 @@ func main (){
 	conn, _ := net.DialTCP("tcp", nil, r)
 	writer := bufio.NewWriter(conn)
     reader := bufio.NewReader(conn)
+	var user string
+	var req string
+	fmt.Scanln(&user)
+	_ , _ = writer.WriteString(user+"\n")
+	writer.Flush()
 	for i:=0; i< 10; i++ {
-		req := "Mensagem\n"
-		_ , _ = writer.WriteString(req)
+		fmt.Scanln(&req)
+		_ , _ = writer.WriteString(req+"\n")
 		writer.Flush()
 		res, _ := reader.ReadString('\n')
 		fmt.Println(res)
