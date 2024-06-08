@@ -17,7 +17,8 @@ func conecta(server net.Conn, user string){
 }
 
 func main(){
-	server, _ := net.Listen("tcp", "127.0.0.1:1313")
+	r, _ :=net.ResolveTCPAddr("tcp","127.0.0.1:1313" )
+	server, _ := net.ListenTCP("tcp", r)
 	fmt.Println("Listen on IP and port: 127.0.0.1:1313")
 	for{
 		conn, _ := server.Accept()

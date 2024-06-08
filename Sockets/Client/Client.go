@@ -17,12 +17,11 @@ func main (){
 	fmt.Scanln(&user)
 	_ , _ = writer.WriteString(user+"\n")
 	writer.Flush()
-	for i:=0; i< 10; i++ {
+	for {
 		fmt.Scanln(&req)
 		_ , _ = writer.WriteString(req+"\n")
 		writer.Flush()
 		res, _ := reader.ReadString('\n')
 		fmt.Println(res)
-		
 	}
 }
