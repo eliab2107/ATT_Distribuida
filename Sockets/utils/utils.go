@@ -109,9 +109,9 @@ func isEqual(board1, board2 [][]bool) bool {
 }
 
 
-func gameInit(board [][]bool) [][]bool {
-    newBoard := makeBoard(width, height)
-    initializeBoard(newBoard, initialBoard)
+func main() {
+    board := makeBoard(width, height)
+    initializeBoard(board, initialBoard)
     for i:=0; i<100; i++{
         printBoard(board)
         newBoard := updateBoard(board)
@@ -123,5 +123,5 @@ func gameInit(board [][]bool) [][]bool {
         time.Sleep(time.Second)
         fmt.Println()
     }
-    return newBoard
+   
 }

@@ -37,7 +37,6 @@ func makeBoard(width, height int) [][]bool {
     return board
 }
 
-// Inicializa o tabuleiro com células vivas de forma aleatória
 // Inicializa o tabuleiro com uma matriz fixa
 func initializeBoard(board [][]bool, initialBoard [][]bool) {
     for i := range board {
@@ -116,7 +115,7 @@ func gameInit(board [][]bool) [][]bool {
     newBoard := makeBoard(width, height)
     initializeBoard(newBoard, initialBoard)
     for i:=0; i<100; i++{
-        printBoard(board)
+        time.Sleep(2 * time.Millisecond)
         newBoard := updateBoard(board)
         if isEqual(board, newBoard) {
             fmt.Println("O jogo atingiu um estado estável.")
@@ -133,23 +132,23 @@ func gameInit(board [][]bool) [][]bool {
 
 func conecta(server net.Conn, board [][]bool){
 	newBoard := makeBoard(width, height)
-    initializeBoard(newBoard, initialNewBoard)
-    for i:=0; i<100; i++{
-        newBoard := updateBoard(board)
-
+    for {
+        newBoard = updateBoard(board)
+		
+		if isEqual(board, newBoard) {
+			_, _ = server.Write([]byte("O jogo atingiu um estado estável."))
+			fmt.Println("O jogo atingiu um estado estável.")
+			break
+		}
+		
 		data, err := json.Marshal(newBoard)
 		if err != nil {
 			log.Println("Erro ao enviar dados:", err)
 			return
-		}
-
-		_, err = server.Write(data)
-        if isEqual(board, newBoard) {
-			_, _ = server.Write([]byte("O jogo atingiu um estado estável."))
-            fmt.Println("O jogo atingiu um estado estável.")
-            break
-        }
-        board = newBoard
+		}		
+		_, err = server.Write(data)   
+		board = newBoard   
+		time.Sleep(90*time.Millisecond)  
 	} 
 	
 }
