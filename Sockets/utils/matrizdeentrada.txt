@@ -1,0 +1,27 @@
+. O . . . 
+O . O . .
+. . O O .
+. . . . .
+. . O . O
+
+{true, false, true, true, true },
+	{false, true, false, true, true },
+	{true, true, false, false, true},
+	{true, true, true, true, true},
+	{true, true, false, true, false},
+
+{false, false, true, true, true },
+	{false, true, false, true, true },
+	{true, true, false, false, true},
+	{true, true, true, true, fals},
+	{true, true, false, true, true},
+
+ORIGINAL
+{
+		{false, true, false, false, false },
+		{true, false, true, false, false },
+		{false, false, true, true, false},
+		{false, false, false, false, false},
+		{false, false, true, false, true},
+}
+// 

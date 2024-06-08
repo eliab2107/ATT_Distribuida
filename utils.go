@@ -17,6 +17,14 @@ var initialBoard = [][]bool	{
 		{false, false, false, false, false},
 		{false, false, true, false, true},
 }
+
+var initialNewBoard = [][]bool	{
+    {false, false, false, false, false },
+    {false, false, false, false, false },
+    {false, false, false, true, false},
+    {false, false, false, false, false},
+    {false, false, false, false, false},
+}
 // Cria uma matriz bidimensional representando o tabuleiro
 func makeBoard(width, height int) [][]bool {
     board := make([][]bool, height)
@@ -101,11 +109,10 @@ func isEqual(board1, board2 [][]bool) bool {
 }
 
 
-func main() {
-    board := makeBoard(width, height)
-    initializeBoard(board, initialBoard)
-
-    for {
+func gameInit(board [][]bool) [][]bool {
+    newBoard := makeBoard(width, height)
+    initializeBoard(newBoard, initialBoard)
+    for i:=0; i<100; i++{
         printBoard(board)
         newBoard := updateBoard(board)
         if isEqual(board, newBoard) {
@@ -116,4 +123,5 @@ func main() {
         time.Sleep(time.Second)
         fmt.Println()
     }
+    return newBoard
 }
