@@ -5,19 +5,20 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 )
 
 const (
-    width  = 4
-	height = 4
+    width  = 5
+	height = 5
 )
 
 var initialBoard = [][]bool	{
-		{false, true, false, false, false },
-		{true, false, true, false, false },
-		{false, false, true, true, false},
-		{false, false, false, false, false},
-		{false, false, true, false, true},
+	{false, true, false, false, false },
+	{true, false, true, false, false },
+	{false, false, true, true, false},
+	{false, false, false, false, false},
+	{false, false, true, false, true},
 }
 
 // Cria uma matriz bidimensional representando o tabuleiro
@@ -74,7 +75,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	timestarted := time.Now()
 	// Envia a matriz serializada pela conexão
 	_, err = conn.Write(data)
 	if err != nil {
@@ -87,10 +88,8 @@ func main() {
 			log.Fatal(err)
 		}
 		err = json.Unmarshal(response[:n], &newMatriz)
-		printBoard(newMatriz)
-		fmt.Println()
 		if err != nil {
-			fmt.Println("Estado final alcançado: ")
+			fmt.Println(time.Now().Sub(timestarted))	
 			break
 		}
 		

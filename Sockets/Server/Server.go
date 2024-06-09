@@ -9,24 +9,24 @@ import (
 )
 
 const (
-    width  = 4
-	height = 4
+    width  = 5
+	height = 5
 )
 
 var initialBoard = [][]bool	{
-		{false, true, false, false, false },
-		{true, false, true, false, false },
-		{false, false, true, true, false},
-		{false, false, false, false, false},
-		{false, false, true, false, true},
+    {false, true, false, false, false },
+    {true, false, true, false, false },
+    {false, false, true, true, false},
+    {false, false, false, false, false},
+    {false, false, true, false, true},
 }
 
 var initialNewBoard = [][]bool	{
-    {false, false, false, false, false },
-    {false, false, false, false, false },
-    {false, false, false, true, false},
-    {false, false, false, false, false},
-    {false, false, false, false, false},
+    {false, false, false, false, false, },
+    {false, false, false, false, false, },
+    {false, false, false, true, false, },
+    {false, false, false, false, false, },
+    {false, false, false, true, false, },
 }
 // Cria uma matriz bidimensional representando o tabuleiro
 func makeBoard(width, height int) [][]bool {
@@ -132,7 +132,8 @@ func gameInit(board [][]bool) [][]bool {
 
 func conecta(server net.Conn, board [][]bool){
 	newBoard := makeBoard(width, height)
-    for {
+    defer server.Close()
+	for {
         newBoard = updateBoard(board)
 		
 		if isEqual(board, newBoard) {
@@ -150,7 +151,6 @@ func conecta(server net.Conn, board [][]bool){
 		board = newBoard   
 		time.Sleep(90*time.Millisecond)  
 	} 
-	
 }
 
 func main(){
