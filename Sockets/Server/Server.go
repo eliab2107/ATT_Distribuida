@@ -2,31 +2,30 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"fmt"
+	"log"
 	"net"
-    "time"
+	"time"
+
+	//"time"
+	"sync"
 )
 
 const (
-    width  = 5
-	height = 5
+    width  = 3
+	height = 3
 )
 
 var initialBoard = [][]bool	{
-    {false, true, false, false, false },
-    {true, false, true, false, false },
-    {false, false, true, true, false},
-    {false, false, false, false, false},
-    {false, false, true, false, true},
+    {false, true, false},
+    {true, false, false,},
+    {false, false, false },
 }
 
 var initialNewBoard = [][]bool	{
-    {false, false, false, false, false, },
-    {false, false, false, false, false, },
-    {false, false, false, true, false, },
-    {false, false, false, false, false, },
-    {false, false, false, true, false, },
+    {false, false, false,},
+    {false, false, false,},
+    {false, false, false,},   
 }
 // Cria uma matriz bidimensional representando o tabuleiro
 func makeBoard(width, height int) [][]bool {
@@ -79,20 +78,6 @@ func updateBoard(board [][]bool) [][]bool {
     return newBoard
 }
 
-// Imprime o tabuleiro no console
-func printBoard(board [][]bool) {
-    for _, row := range board {
-        for _, cell := range row {
-            if cell {
-                fmt.Print("O ")
-            } else {
-                fmt.Print(". ")
-            }
-        }
-        fmt.Println()
-    }
-}
-
 func isEqual(board1, board2 [][]bool) bool {
     if len(board1) != len(board2) {
         return false
@@ -110,35 +95,14 @@ func isEqual(board1, board2 [][]bool) bool {
     return true
 }
 
-
-func gameInit(board [][]bool) [][]bool {
-    newBoard := makeBoard(width, height)
-    initializeBoard(newBoard, initialBoard)
-    for i:=0; i<100; i++{
-        time.Sleep(2 * time.Millisecond)
-        newBoard := updateBoard(board)
-        if isEqual(board, newBoard) {
-            fmt.Println("O jogo atingiu um estado estável.")
-            break
-        }
-        board = newBoard
-        time.Sleep(time.Second)
-        fmt.Println()
-    }
-    return newBoard
-}
-
-
-
-func conecta(server net.Conn, board [][]bool){
+func conecta(server net.Conn, board [][]bool, wg *sync.WaitGroup){
 	newBoard := makeBoard(width, height)
-    defer server.Close()
+    
 	for {
         newBoard = updateBoard(board)
 		
 		if isEqual(board, newBoard) {
 			_, _ = server.Write([]byte("O jogo atingiu um estado estável."))
-			fmt.Println("O jogo atingiu um estado estável.")
 			break
 		}
 		
@@ -147,29 +111,30 @@ func conecta(server net.Conn, board [][]bool){
 			log.Println("Erro ao enviar dados:", err)
 			return
 		}		
-		_, err = server.Write(data)   
-		board = newBoard   
-		time.Sleep(90*time.Millisecond)  
+		  _, _ = server.Write(data)  
+		board = newBoard 
+        time.Sleep(500 * time.Microsecond)
 	} 
+    wg.Done()
 }
 
 func main(){
 	r, _ :=net.ResolveTCPAddr("tcp","127.0.0.1:1313" )
 	server, _ := net.ListenTCP("tcp", r)
 	fmt.Println("Listen on IP and port: 127.0.0.1:1313")
-
-	data := make([]byte, 4096) // Tamanho do buffer de recebimento
-	
-	for{
-		//Aceitando conexão
-		conn, _ := server.Accept()
-		fmt.Println("Conexao iniciada")
+    var wg sync.WaitGroup
+	data := make([]byte, 96) // Tamanho do buffer de recebimento
+	//Aceitando conexão
+	conn, _ := server.Accept()
+    fmt.Println("Conexao iniciada")
+    for i:= 0; i<5000; i++{
 		//Recebendo a a matriz padrão de entrada
 		n, _ := conn.Read(data)
 		var board [][]bool
 		//Desserializando ela
 		_ = json.Unmarshal(data[:n], &board)
 		//Chamando a execução do jogo
-		go conecta(conn, board)
+        wg.Add(1)
+		go conecta(conn, board, &wg)
 	}
 }

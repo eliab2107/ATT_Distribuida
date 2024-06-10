@@ -9,16 +9,22 @@ import (
 )
 
 const (
-    width  = 5
-	height = 5
+    width  = 3
+	height = 3
 )
-
 var initialBoard = [][]bool	{
-	{false, true, false, false, false },
-	{true, false, true, false, false },
-	{false, false, true, true, false},
-	{false, false, false, false, false},
-	{false, false, true, false, true},
+    {false, true, false},
+    {true, false, false,},
+    {false, false, false },
+}
+
+func calculateMedia(durations []time.Duration) time.Duration {
+    var total time.Duration
+    for _, duration := range durations {
+        total += duration
+    }
+    average := total / time.Duration(len(durations))
+    return average
 }
 
 // Cria uma matriz bidimensional representando o tabuleiro
@@ -61,14 +67,16 @@ func main() {
 	// Definindo as variaveis
 	board := makeBoard(width, height)
     initializeBoard(board, initialBoard)
-	response := make([]byte, 4096)
-	var newMatriz [][]bool
+	response := make([]byte, 96)
+	
+	var mediaList []time.Duration
+	var repeticoes = 5000
+	cont := 0
 	conn, err := net.Dial("tcp", "127.0.0.1:1313")
 	defer conn.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer conn.Close()
 
 	// Serializa a matriz para JSON
 	data, err := json.Marshal(board)
@@ -77,22 +85,18 @@ func main() {
 	}
 	timestarted := time.Now()
 	// Envia a matriz serializada pela conexão
-	_, err = conn.Write(data)
-	if err != nil {
-		log.Fatal(err)
-	}
+	for i:=0;i<repeticoes;i++{
+		timeatual := time.Now()
+		_, _ = conn.Write(data)
 
-	for {
-		n, err := conn.Read(response)
-		if err != nil {
-			log.Fatal(err)
+		for j:=0;j<=1;j++{
+
+			_, _ = conn.Read(response)
+				
 		}
-		err = json.Unmarshal(response[:n], &newMatriz)
-		if err != nil {
-			fmt.Println(time.Now().Sub(timestarted))	
-			break
-		}
-		
+		cont++
+		mediaList = append(mediaList, time.Now().Sub(timeatual))
 	}
-	
+	tempoMedio := calculateMedia(mediaList)
+	fmt.Println("Repetições: ", repeticoes, "Tempo total: ", time.Now().Sub(timestarted), "Tempo médio: ", tempoMedio)
 }
