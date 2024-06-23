@@ -5,24 +5,51 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"time"
+	"net/rpc"
 )
 
+type GameOfLife struct{}
+
+func (g *GameOfLife) UpdateBoard(board [][]bool, reply *string) error{
+	newBoard := updateBoard(board)
+	if isEqual(board, newBoard){
+		*reply = "O jogo atingiu um estado estável."
+	} else{
+		updateBoard, _ := json.Marshal(newBoard)
+		*reply = string(updateBoard)
+		
+	}
+
+	return nil
+}
+
+
+func (g *GameOfLife) InitializeBoard(_ struct{}, board *[][]bool) error {
+	*board = makeBoard(width, height)
+	initializeBoard(*board, initialBoard)
+	return nil
+}
+
+
 const (
-    width  = 3
-	height = 3
+    width  = 5
+	height = 5
 )
 
 var initialBoard = [][]bool	{
-    {false, true, false},
-    {true, false, false,},
-    {false, false, false },
+    {false, true, false, false, false },
+    {true, false, true, false, false },
+    {false, false, true, true, false},
+    {false, false, false, false, false},
+    {false, false, true, false, true},
 }
 
 var initialNewBoard = [][]bool	{
-    {false, false, false,},
-    {false, false, false,},
-    {false, false, false,},   
+    {false, false, false, false, false, },
+    {false, false, false, false, false, },
+    {false, false, false, true, false, },
+    {false, false, false, false, false, },
+    {false, false, false, true, false, },
 }
 // Cria uma matriz bidimensional representando o tabuleiro
 func makeBoard(width, height int) [][]bool {
@@ -75,6 +102,20 @@ func updateBoard(board [][]bool) [][]bool {
     return newBoard
 }
 
+// Imprime o tabuleiro no console
+func printBoard(board [][]bool) {
+    for _, row := range board {
+        for _, cell := range row {
+            if cell {
+                fmt.Print("O ")
+            } else {
+                fmt.Print(". ")
+            }
+        }
+        fmt.Println()
+    }
+}
+
 func isEqual(board1, board2 [][]bool) bool {
     if len(board1) != len(board2) {
         return false
@@ -92,48 +133,19 @@ func isEqual(board1, board2 [][]bool) bool {
     return true
 }
 
-func conecta(server net.Conn, board [][]bool){
-	newBoard := makeBoard(width, height)
-    
-	for {
-        newBoard = updateBoard(board)
-		
-		if isEqual(board, newBoard) {
-			_, _ = server.Write([]byte("O jogo atingiu um estado estável."))
-			break
-		}
-		
-		data, err := json.Marshal(newBoard)
-		if err != nil {
-			log.Println("Erro ao enviar dados:", err)
-			return
-		}		
-		  _, _ = server.Write(data)  
-		board = newBoard 
-        time.Sleep(500 * time.Microsecond)
-	} 
-}
-
 func main(){
-	r, _ :=net.ResolveTCPAddr("tcp","127.0.0.1:1313" )
-	server, _ := net.ListenTCP("tcp", r)
-	fmt.Println("Listen on IP and port: 127.0.0.1:1313")
-   
-	data := make([]byte, 96) // Tamanho do buffer de recebimento
-	//Aceitando conexão
-    for {
-        conn, _ := server.Accept()
-        fmt.Println("Conexao iniciada")
-        for i:= 0; i<100; i++{
-            //Recebendo a a matriz padrão de entrada
-            n, _ := conn.Read(data)
-            var board [][]bool
-            //Desserializando ela
-            _ = json.Unmarshal(data[:n], &board)
-            //Chamando a execução do jogo
-            
-            go conecta(conn, board)
-        }
-    }
+
+	game := new(GameOfLife)
+	rpc.Register(game)
 	
+
+	listener, err := net.Listen("tcp", "127.0.0.1:1313")
+	if err != nil{
+		log.Fatal("Erro ao iniciar o servidor: ", err)
+	}
+
+	fmt.Println("O servidor está pronto para se conectar")
+	rpc.Accept(listener)
+
+
 }
