@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package gameoflife;
 
+option go_package = "github.com/GRPC/Server/go.mod";
 // Definição da mensagem para uma célula individual
 message Cell {
     bool alive = 1;
